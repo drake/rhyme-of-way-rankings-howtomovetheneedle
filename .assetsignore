@@ -12,5 +12,7 @@ wrangler.toml
 worker.js
 README.md
 ship.sh
+scripts
+scripts/**
 *.log
 .DS_Store
