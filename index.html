@@ -114,6 +114,24 @@
   a.map { font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.78rem; color: var(--accent); text-decoration: none; }
   a.map:hover { text-decoration: underline; }
 
+  .site-nav {
+    display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem;
+    padding: .7rem 1.25rem; border-bottom: 1px solid var(--line);
+    background: var(--card); font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .site-nav .brand { color: var(--ink); text-decoration: none; font-weight: 800; letter-spacing: .01em; margin-right: auto; }
+  .theme-picks { display: flex; flex-wrap: wrap; gap: 6px; }
+  .theme-picks button {
+    font: 600 12px/1 ui-sans-serif, system-ui, sans-serif;
+    padding: .45rem .7rem; border: 1px solid var(--line); background: var(--input);
+    color: var(--ink); border-radius: 999px; cursor: pointer;
+  }
+  .theme-picks button:hover { border-color: var(--accent); }
+  .site-nav .nav-cta { margin-left: 0; }
+  @media (max-width: 720px) {
+    .site-nav .brand { flex: 1 1 100%; }
+  }
+
   .stage {
     max-width: 1240px; margin: 0 auto 2rem; padding: 0 1.25rem;
     display: grid; grid-template-columns: minmax(300px, 440px) 1fr; gap: 1rem;
@@ -166,6 +184,16 @@
 </style>
 </head>
 <body>
+<nav class="site-nav" aria-label="Site and display">
+  <a class="brand" href="https://howtomovetheneedle.com/">How To Move The Needle</a>
+  <div class="theme-picks" role="group" aria-label="Theme">
+    <button type="button" data-theme-pick="auto">Auto</button>
+    <button type="button" data-theme-pick="light">Light</button>
+    <button type="button" data-theme-pick="dark">Dark</button>
+    <button type="button" data-theme-pick="matrix">Matrix</button>
+  </div>
+  <a href="#" class="nav-cta" data-flashlight-trigger>Try Flashlight Mode</a>
+</nav>
 <header>
   <div class="kicker">How To Move The Needle · ranking experiment</div>
   <h1>Rhyme of Way,<br>ranked by rhyme.</h1>
@@ -312,6 +340,17 @@ render();
 </script>
 <script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.2.0/dist/maplibre-gl.min.js"></script>
 <script defer src="assets/map.js"></script>
-<script src="assets/theme.js" defer></script>
+<script src="assets/theme.js?v=2" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('[data-theme-pick]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var mode = b.getAttribute('data-theme-pick');
+      var btn = document.querySelector('.tt-mode-btn[data-mode="' + mode + '"]');
+      if (btn) btn.click();
+    });
+  });
+});
+</script>
 </body>
 </html>
