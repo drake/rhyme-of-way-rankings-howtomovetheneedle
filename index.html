@@ -5,6 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rhyme of Way Rankings — how much they actually rhyme</title>
 <meta name="description" content="5,482 U.S. rhyming street intersections from Riley Walz’s Rhyme of Way, reranked by rhyme strength.">
+<meta name="theme-color" content="#9b2c2c">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://rhyme-of-way-rankings.howtomovetheneedle.com/">
+<meta property="og:title" content="Rhyme of Way, ranked by rhyme.">
+<meta property="og:description" content="5,482 U.S. street intersections whose names rhyme — sorted by how much they actually rhyme.">
+<meta property="og:image" content="https://rhyme-of-way-rankings.howtomovetheneedle.com/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Rhyme of Way ranked by rhyme — Old Dairy and Gold Berry street signs">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Rhyme of Way, ranked by rhyme.">
+<meta name="twitter:description" content="5,482 U.S. rhyming intersections, reranked by rhyme strength.">
+<meta name="twitter:image" content="https://rhyme-of-way-rankings.howtomovetheneedle.com/assets/og.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.2.0/dist/maplibre-gl.min.css">
 <style>
   :root {
     --ink: #16130e;
@@ -99,6 +113,55 @@
   .how p, .how li { color: var(--lede); }
   a.map { font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.78rem; color: var(--accent); text-decoration: none; }
   a.map:hover { text-decoration: underline; }
+
+  .stage {
+    max-width: 1240px; margin: 0 auto 2rem; padding: 0 1.25rem;
+    display: grid; grid-template-columns: minmax(300px, 440px) 1fr; gap: 1rem;
+    align-items: stretch;
+  }
+  .list-pane { min-width: 0; display: flex; flex-direction: column; max-height: min(78vh, 860px); }
+  .list-pane .controls { max-width: none; margin: 0; padding: 0 0 .6rem; }
+  .list-pane .meta { max-width: none; margin: 0; padding: 0 0 .5rem; }
+  .list-scroll { overflow: auto; flex: 1; border: 1px solid var(--line); background: var(--card); }
+  .list-scroll table { width: 100%; margin: 0; border: 0; }
+  .list-scroll th { top: 0; }
+  #tb tr { cursor: pointer; }
+  #tb tr.active { background: color-mix(in srgb, var(--accent) 12%, var(--card)); }
+  .map-pane { position: relative; min-height: 420px; border: 1px solid var(--line); background: var(--card); }
+  #map { position: absolute; inset: 0; }
+  .map-reset {
+    position: absolute; z-index: 2; left: 10px; top: 10px;
+    font: 600 12px/1 ui-sans-serif, system-ui, sans-serif;
+    padding: .45rem .65rem; border: 1px solid var(--line); background: var(--card);
+    color: var(--ink); cursor: pointer; border-radius: 6px;
+  }
+  #sign-card {
+    position: absolute; z-index: 2; left: 12px; bottom: 12px; right: auto;
+    width: min(320px, calc(100% - 24px));
+    background: var(--card); border: 1px solid var(--line); padding: .7rem .8rem .85rem;
+    box-shadow: 0 12px 28px rgba(0,0,0,.16);
+  }
+  #sign-card[hidden] { display: none !important; }
+  .sign-top { display: flex; justify-content: space-between; gap: .5rem; align-items: baseline;
+    font-family: ui-sans-serif, system-ui, sans-serif; font-size: .78rem; color: var(--muted); margin-bottom: .55rem; }
+  #sign-close { border: 0; background: transparent; color: var(--ink); cursor: pointer; font-size: 1.1rem; line-height: 1; }
+  .blades { display: flex; flex-direction: column; gap: .35rem; align-items: flex-start; }
+  .blade {
+    background: #0e5a3a; color: #fff; border: 3px solid #f7f3ea; border-radius: 6px;
+    font: 800 .95rem/1.15 ui-sans-serif, system-ui, sans-serif; letter-spacing: .06em;
+    text-transform: uppercase; padding: .4rem .75rem; max-width: 100%;
+    box-shadow: 0 8px 16px rgba(0,0,0,.18);
+  }
+  html[data-theme="matrix"] .blade { background: #003b1c; border-color: #00ff66; color: #00ff66; }
+  .sign-foot { display: flex; justify-content: space-between; gap: .6rem; margin-top: .65rem;
+    font-family: ui-sans-serif, system-ui, sans-serif; font-size: .75rem; }
+  .sign-foot a { color: var(--accent); text-decoration: none; }
+  @media (max-width: 860px) {
+    .stage { grid-template-columns: 1fr; }
+    .map-pane { min-height: 48vh; height: 48vh; }
+    .list-pane { max-height: none; }
+    .list-scroll { max-height: 70vh; }
+  }
 </style>
 </head>
 <body>
@@ -133,42 +196,66 @@
   </details>
 </section>
 
-<div class="controls">
-  <input id="q" type="search" placeholder="Search names, city, or state…">
-  <select id="type">
-    <option value="">All types</option>
-    <option>Mosaic</option>
-    <option>Triple</option>
-    <option>Phrase</option>
-    <option>Double</option>
-    <option>Perfect</option>
-    <option>Slant</option>
-    <option>Near</option>
-    <option>Weak</option>
-  </select>
-  <select id="sort">
-    <option value="score">Sort: rhyme score</option>
-    <option value="name">Sort: name</option>
-    <option value="state">Sort: state</option>
-    <option value="type">Sort: type</option>
-  </select>
+<div class="stage">
+  <div class="list-pane">
+    <div class="controls">
+      <input id="q" type="search" placeholder="Search names, city, or state…">
+      <select id="type">
+        <option value="">All types</option>
+        <option>Mosaic</option>
+        <option>Triple</option>
+        <option>Phrase</option>
+        <option>Double</option>
+        <option>Perfect</option>
+        <option>Slant</option>
+        <option>Near</option>
+        <option>Weak</option>
+      </select>
+      <select id="sort">
+        <option value="score">Sort: rhyme score</option>
+        <option value="name">Sort: name</option>
+        <option value="state">Sort: state</option>
+        <option value="type">Sort: type</option>
+      </select>
+    </div>
+    <div class="meta" id="count"></div>
+    <div class="list-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th data-k="score">#</th>
+            <th data-k="score">Score</th>
+            <th data-k="type">Type</th>
+            <th data-k="name">Intersection</th>
+            <th data-k="state">Place</th>
+          </tr>
+        </thead>
+        <tbody id="tb"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="map-pane">
+    <button class="map-reset" id="map-reset" type="button">Fit US</button>
+    <div id="map" role="region" aria-label="Map of rhyming intersections"></div>
+    <div id="sign-card" hidden>
+      <div class="sign-top">
+        <span id="sign-place"></span>
+        <button id="sign-close" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="blades">
+        <div class="blade" id="sign-a"></div>
+        <div class="blade" id="sign-b"></div>
+      </div>
+      <div class="sign-foot">
+        <span id="sign-score"></span>
+        <a id="sign-maps" target="_blank" rel="noopener">Open in maps ↗</a>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="meta" id="count"></div>
-<table>
-  <thead>
-    <tr>
-      <th data-k="score">#</th>
-      <th data-k="score">Score</th>
-      <th data-k="type">Type</th>
-      <th data-k="name">Intersection</th>
-      <th data-k="state">Place</th>
-    </tr>
-  </thead>
-  <tbody id="tb"></tbody>
-</table>
 <footer>
   Original project: <a href="https://walzr.com/rhyme-of-way">Rhyme of Way</a> ·
-  Data: OpenStreetMap-derived pairs published by Walz ·
+  Data: OpenStreetMap-derived pairs published by Walz · Map: <a href="https://openfreemap.org/">OpenFreeMap</a> / <a href="https://maplibre.org/">MapLibre</a> ·
   Rankings: How To Move The Needle ·
   <a href="rhyme-rankings.json">Download scored JSON</a>
 </footer>
@@ -184,7 +271,7 @@ function maps(r){
   return `https://maps.google.com/?q=${r.lat},${r.lon}`;
 }
 function row(r){
-  return `<tr>
+  return `<tr data-r="${r.r}">
     <td class="rank">${r.r}</td>
     <td class="score">${r.s.toFixed(1)}</td>
     <td><span class="tag ${r.l}">${r.l}</span></td>
@@ -222,6 +309,8 @@ document.querySelectorAll('th[data-k]').forEach(th => {
 });
 render();
 </script>
+<script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.2.0/dist/maplibre-gl.min.js"></script>
+<script defer src="assets/map.js"></script>
 <script src="assets/theme.js" defer></script>
 </body>
 </html>

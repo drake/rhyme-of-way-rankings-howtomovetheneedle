@@ -16,3 +16,4 @@ scripts
 scripts/**
 *.log
 .DS_Store
+og-card.html
