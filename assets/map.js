@@ -3,6 +3,22 @@
   'use strict';
   if (!window.maplibregl || !window.DATA) return;
 
+  function rasterStyle(dark) {
+    return {
+      version: 8,
+      sources: {
+        carto: {
+          type: 'raster',
+          tiles: [dark
+            ? 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
+            : 'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png'],
+          tileSize: 256,
+          attribution: '© OpenStreetMap © CARTO'
+        }
+      },
+      layers: [{ id: 'carto', type: 'raster', source: 'carto' }]
+    };
+  }
   var STYLES = {
     light: 'https://tiles.openfreemap.org/styles/liberty',
     dark: 'https://tiles.openfreemap.org/styles/dark'
@@ -155,11 +171,20 @@
   });
   map.touchZoomRotate.disableRotation();
   map.addControl(new maplibregl.NavigationControl({ showCompass: false, visualizePitch: false }), 'top-right');
+  var usedFallback = false;
   map.on('load', function () { addLayers(); map.resize(); });
   map.on('style.load', addLayers);
+  setTimeout(function () {
+    if (layersReady || usedFallback) return;
+    usedFallback = true;
+    layersReady = false;
+    var theme = document.documentElement.getAttribute('data-theme');
+    map.setStyle(rasterStyle(theme === 'dark' || theme === 'matrix'));
+  }, 5000);
   if (window.ResizeObserver) {
-    new ResizeObserver(function () { map.resize(); }).observe(document.getElementById('map'));
+    new ResizeObserver(function () { map.resize(); }).observe(document.querySelector('.map-pane'));
   }
+  setTimeout(function () { map.resize(); }, 400);
 
   map.on('mouseenter', 'hit', function () { map.getCanvas().style.cursor = 'pointer'; });
   map.on('mouseleave', 'hit', function () { map.getCanvas().style.cursor = ''; });
