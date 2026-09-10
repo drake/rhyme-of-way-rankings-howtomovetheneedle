@@ -1,0 +1,16 @@
+name = "rhyme-of-way-rankings-howtomovetheneedle"
+main = "worker.js"
+compatibility_date = "2026-09-09"
+workers_dev = true
+
+[[routes]]
+pattern = "rhyme-of-way-rankings.howtomovetheneedle.com"
+custom_domain = true
+
+[assets]
+run_worker_first = true
+directory = "./"
+binding = "ASSETS"
+
+[vars]
+PUBLIC_ORIGIN = "https://rhyme-of-way-rankings.howtomovetheneedle.com"
